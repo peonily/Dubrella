@@ -60,7 +60,7 @@ function updatePrimaryActiveStates() {
     } else if (href.includes("#categories")) {
       isActive = isHomePage() && currentHash === "#categories";
     } else if (href.includes("#home")) {
-      isActive = isHomePage() && (currentHash === "" || currentHash === "#home" || currentHash === "#lookbook" || currentHash === "#deals");
+      isActive = isHomePage() && (currentHash === "" || currentHash === "#home" || currentHash === "#lookbook");
     }
 
     if (isActive) {
@@ -130,8 +130,8 @@ function setupBottomNav() {
   const links = [
     { label: "Home", href: "index.html#home" },
     { label: "Categories", href: "index.html#categories" },
-    { label: "Deals", href: "index.html#deals" },
-    { label: "Cart", href: "knits-cider-cardigan.html" }
+    { label: "Lookbook", href: "index.html#lookbook" },
+    { label: "Knits", href: "knits-cider-cardigan.html" }
   ];
 
   links.forEach((item) => {
@@ -156,12 +156,12 @@ function updateBottomNavActiveStates() {
     const key = link.dataset.bottomNav;
     let isActive = false;
 
-    if (key === "cart") {
+    if (key === "knits") {
       isActive = currentFile === "knits-cider-cardigan.html";
     } else if (key === "categories") {
       isActive = isHomePage() && currentHash === "#categories";
-    } else if (key === "deals") {
-      isActive = isHomePage() && currentHash === "#deals";
+    } else if (key === "lookbook") {
+      isActive = isHomePage() && currentHash === "#lookbook";
     } else if (key === "home") {
       isActive = isHomePage() && (currentHash === "" || currentHash === "#home" || currentHash === "#lookbook");
     }

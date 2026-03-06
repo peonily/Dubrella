@@ -13,13 +13,13 @@
   <link rel="icon" type="image/png" href="assets/DUBRELLA.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Critical mobile-first CSS for fast first paint on Cloudflare edge -->
   <style>
-    :root { --critical-bg: #fafafa; --critical-text: #161616; }
+    :root { --critical-bg: #fff6fa; --critical-text: #2d1f28; }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--critical-bg); color: var(--critical-text); font-family: "DM Sans", sans-serif; font-size: 16px; line-height: 1.5; }
-    .site-header { position: sticky; top: 0; z-index: 110; background: rgba(250, 250, 250, 0.96); border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+    body { margin: 0; background: var(--critical-bg); color: var(--critical-text); font-family: "Manrope", sans-serif; font-size: 16px; line-height: 1.5; }
+    .site-header { position: sticky; top: 0; z-index: 110; background: rgba(255, 246, 250, 0.96); border-bottom: 1px solid rgba(122, 74, 97, 0.14); }
     .nav { min-height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
   </style>
   <link rel="preload" href="styles.css" as="style">
@@ -42,7 +42,6 @@
 
   <!-- Main content spacing tuned for 375-430px screens -->
   <main id="home">
-    <!-- Hero now separates text and media for clean readability on phones -->
     <section class="hero section reveal">
       <div class="hero-media-wrap">
         <img
@@ -52,20 +51,14 @@
           alt="Spring fashion banner with cherry blossoms and pastel garments"
           loading="eager"
           fetchpriority="high">
-      </div>
-      <div class="hero-content">
-        <p class="eyebrow">Spring Edit 2026</p>
-        <h1>Soft Looks, Modern Lines</h1>
-        <p class="hero-sub">
-          Discover feminine Korean-inspired outfit formulas, curated categories, and high-intent affiliate picks built for mobile shopping.
-        </p>
-        <div class="hero-cta">
-          <a class="hero-link" href="index.html#deals">Shop Deals</a>
+        <div class="hero-overlay">
+          <p class="hero-kicker">Spring Edit 2026</p>
+          <h1>Soft Looks,<br><em>Modern Lines</em></h1>
+          <a class="hero-link" href="#featured">Shop Deals</a>
         </div>
       </div>
     </section>
 
-    <!-- Look cards use a fluid grid with 3:4 media and touch-friendly spacing -->
     <section class="lookbook section section-shell reveal" id="lookbook">
       <div class="section-head">
         <h2>Shop by Look</h2>
@@ -92,14 +85,13 @@
       </div>
     </section>
 
-    <!-- Category modules are converted to mobile cards with safe tap targets -->
     <section class="categories section section-shell reveal" id="categories">
       <div class="section-head">
         <h2>Shop by Category</h2>
       </div>
       <div class="category-grid">
         <article class="category-item">
-          <a class="category-link" href="index.html#deals">
+          <a class="category-link" href="index.html#lookbook">
             <div class="circle"><img loading="lazy" decoding="async" src="assets/aesthetic.jpeg" alt="Pastel tops category"></div>
             <p>Tops</p>
           </a>
@@ -111,31 +103,31 @@
           </a>
         </article>
         <article class="category-item">
-          <a class="category-link" href="index.html#deals">
+          <a class="category-link" href="index.html#lookbook">
             <div class="circle"><img loading="lazy" decoding="async" src="assets/outer.jpeg" alt="Outerwear category in neutral layers"></div>
             <p>Outer</p>
           </a>
         </article>
         <article class="category-item">
-          <a class="category-link" href="index.html#deals">
+          <a class="category-link" href="index.html#lookbook">
             <div class="circle"><img loading="lazy" decoding="async" src="assets/dress.jpeg" alt="Feminine dresses category"></div>
             <p>Dresses</p>
           </a>
         </article>
         <article class="category-item">
-          <a class="category-link" href="index.html#deals">
+          <a class="category-link" href="index.html#lookbook">
             <div class="circle"><img loading="lazy" decoding="async" src="assets/bottoms.jpeg" alt="Pastel tailored bottoms category"></div>
             <p>Bottoms</p>
           </a>
         </article>
         <article class="category-item">
-          <a class="category-link" href="index.html#deals">
+          <a class="category-link" href="index.html#lookbook">
             <div class="circle"><img loading="lazy" decoding="async" src="assets/shoes.jpeg" alt="Soft neutral shoes category"></div>
             <p>Shoes</p>
           </a>
         </article>
         <article class="category-item">
-          <a class="category-link" href="index.html#deals">
+          <a class="category-link" href="index.html#lookbook">
             <div class="circle"><img loading="lazy" decoding="async" src="assets/bags.jpeg" alt="Elegant pastel bags category"></div>
             <p>Bags</p>
           </a>
@@ -143,51 +135,31 @@
       </div>
     </section>
 
-    <!-- Product cards now include image, name, price, and full-width CTA for mobile commerce UX -->
-    <section class="section section-shell reveal" id="deals" aria-label="Featured affiliate deals">
+    <section class="featured section reveal" id="featured">
       <div class="section-head">
         <h2>Featured Deals</h2>
       </div>
-      <div class="product-grid">
-        <article class="product-card">
-          <div class="product-card-media">
-            <img loading="lazy" decoding="async" src="assets/cider-cardigan.jpg" srcset="assets/cider-cardigan.jpg 1x, assets/cider-cardigan.jpg 2x" alt="CIDER wool-blend V-neck cardigan in beige">
-          </div>
-          <div class="product-card-body">
-            <h3>CIDER Wool-Blend Cardigan</h3>
-            <p class="product-price">$37.99</p>
-            <a class="product-cta" href="https://amzn.to/4udmgsE" target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
-          </div>
+      <div class="featured-grid">
+        <article class="featured-card">
+          <a class="featured-link" href="knits-cider-cardigan.html">
+            <div class="featured-media">
+              <img loading="lazy" decoding="async" src="assets/cider-cardigan.jpg" alt="Cream cardigan featured deal">
+            </div>
+          </a>
         </article>
-        <article class="product-card">
-          <div class="product-card-media">
-            <img loading="lazy" decoding="async" src="assets/dress.jpeg" srcset="assets/dress.jpeg 1x, assets/dress.jpeg 2x" alt="Soft pink midi dress for spring styling">
-          </div>
-          <div class="product-card-body">
-            <h3>Soft Pink Midi Dress</h3>
-            <p class="product-price">From $34.00</p>
-            <a class="product-cta" href="index.html#categories">Shop Dresses</a>
-          </div>
+        <article class="featured-card">
+          <a class="featured-link" href="blog-soft-girl-aesthetic.html">
+            <div class="featured-media">
+              <img loading="lazy" decoding="async" src="assets/outer.jpeg" alt="Pink ruffle blouse featured deal">
+            </div>
+          </a>
         </article>
-        <article class="product-card">
-          <div class="product-card-media">
-            <img loading="lazy" decoding="async" src="assets/outer.jpeg" srcset="assets/outer.jpeg 1x, assets/outer.jpeg 2x" alt="Light outer layer with Korean-inspired silhouette">
-          </div>
-          <div class="product-card-body">
-            <h3>Light Outer Layer</h3>
-            <p class="product-price">From $42.00</p>
-            <a class="product-cta" href="index.html#categories">Shop Outerwear</a>
-          </div>
-        </article>
-        <article class="product-card">
-          <div class="product-card-media">
-            <img loading="lazy" decoding="async" src="assets/knit.jpeg" srcset="assets/knit.jpeg 1x, assets/knit.jpeg 2x" alt="Soft knit top in minimal feminine palette">
-          </div>
-          <div class="product-card-body">
-            <h3>Minimal Knit Top</h3>
-            <p class="product-price">From $29.00</p>
-            <a class="product-cta" href="knits-cider-cardigan.html">View Knits</a>
-          </div>
+        <article class="featured-card">
+          <a class="featured-link" href="blog-feminine-minimal-styling.html">
+            <div class="featured-media">
+              <img loading="lazy" decoding="async" src="assets/Soft_pink_pin_aesthetic_2cd58c2b3a.jpeg" alt="Pink lace editorial look featured deal">
+            </div>
+          </a>
         </article>
       </div>
     </section>
@@ -206,7 +178,7 @@
       <a href="blog.html">Blog</a>
       <a href="about.html">About Us</a>
       <a href="index.html#categories">Categories</a>
-      <a href="index.html#deals">Deals</a>
+      <a href="knits-cider-cardigan.html">Knits</a>
     </div>
     <div>&copy; <span data-year></span> Dubrella</div>
   </footer>
