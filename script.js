@@ -11,6 +11,51 @@ function isHomePage() {
   return file === "" || file === "index.html";
 }
 
+function isProductPage() {
+  return Boolean(document.querySelector('meta[property="og:type"][content="product"]'));
+}
+
+function ensureShopLinks() {
+  document.querySelectorAll(".menu").forEach((menu) => {
+    if (menu.querySelector('a[href="shop.html"]')) return;
+
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = "shop.html";
+    link.textContent = "Shop";
+    item.appendChild(link);
+
+    const blogItem = Array.from(menu.querySelectorAll("li")).find((entry) => {
+      const anchor = entry.querySelector("a");
+      return anchor && (anchor.getAttribute("href") || "").toLowerCase().includes("blog.html");
+    });
+
+    if (blogItem) {
+      menu.insertBefore(item, blogItem);
+    } else {
+      menu.appendChild(item);
+    }
+  });
+
+  document.querySelectorAll(".footer-links").forEach((group) => {
+    if (group.querySelector('a[href="shop.html"]')) return;
+
+    const link = document.createElement("a");
+    link.href = "shop.html";
+    link.textContent = "Shop";
+
+    const blogLink = Array.from(group.querySelectorAll("a")).find((entry) =>
+      ((entry.getAttribute("href") || "").toLowerCase().includes("blog.html"))
+    );
+
+    if (blogLink) {
+      group.insertBefore(link, blogLink);
+    } else {
+      group.appendChild(link);
+    }
+  });
+}
+
 function setupReveal() {
   const revealItems = document.querySelectorAll(".reveal");
   if (!revealItems.length) return;
@@ -48,12 +93,15 @@ function updatePrimaryActiveStates() {
   const currentHash = getCurrentHash();
   const isBlogPage = currentFile === "blog.html" || currentFile.startsWith("blog-");
   const isAboutPage = currentFile === "about.html";
+  const isShopPage = currentFile === "shop.html" || isProductPage();
 
   links.forEach((link) => {
     const href = (link.getAttribute("href") || "").toLowerCase();
     let isActive = false;
 
-    if (href.includes("blog.html")) {
+    if (href === "shop.html") {
+      isActive = isShopPage;
+    } else if (href.includes("blog.html")) {
       isActive = isBlogPage;
     } else if (href.includes("about.html")) {
       isActive = isAboutPage;
@@ -129,9 +177,9 @@ function setupBottomNav() {
 
   const links = [
     { label: "Home", href: "index.html#home" },
+    { label: "Shop", href: "shop.html" },
     { label: "Categories", href: "index.html#categories" },
-    { label: "Lookbook", href: "index.html#lookbook" },
-    { label: "Knits", href: "knits-cider-cardigan.html" }
+    { label: "Blog", href: "blog.html" }
   ];
 
   links.forEach((item) => {
@@ -151,17 +199,18 @@ function updateBottomNavActiveStates() {
 
   const currentFile = getCurrentFile();
   const currentHash = getCurrentHash();
+  const isShopPage = currentFile === "shop.html" || isProductPage();
 
   links.forEach((link) => {
     const key = link.dataset.bottomNav;
     let isActive = false;
 
-    if (key === "knits") {
-      isActive = currentFile === "knits-cider-cardigan.html";
+    if (key === "shop") {
+      isActive = isShopPage;
+    } else if (key === "blog") {
+      isActive = currentFile === "blog.html" || currentFile.startsWith("blog-");
     } else if (key === "categories") {
       isActive = isHomePage() && currentHash === "#categories";
-    } else if (key === "lookbook") {
-      isActive = isHomePage() && currentHash === "#lookbook";
     } else if (key === "home") {
       isActive = isHomePage() && (currentHash === "" || currentHash === "#home" || currentHash === "#lookbook");
     }
@@ -175,6 +224,7 @@ function updateBottomNavActiveStates() {
   });
 }
 
+ensureShopLinks();
 setupReveal();
 setupYear();
 setupMobileMenu();

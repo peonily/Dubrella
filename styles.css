@@ -399,7 +399,8 @@ body.nav-enhanced .menu {
 
 .blog-main,
 .article-main,
-.product-main {
+.product-main,
+.shop-main {
   margin-top: 1.25rem;
 }
 
@@ -522,6 +523,41 @@ body.nav-enhanced .menu {
   border-radius: 22px;
 }
 
+.product-media--gallery {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.product-hero-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.product-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 0.55rem;
+}
+
+.product-thumb {
+  border: 1px solid rgba(184, 146, 139, 0.24);
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 251, 248, 0.9);
+  cursor: pointer;
+}
+
+.product-thumb.is-active {
+  box-shadow: 0 0 0 2px rgba(185, 135, 128, 0.45);
+}
+
+.product-thumb img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
 .product-actions {
   display: grid;
   gap: 0.75rem;
@@ -545,6 +581,162 @@ body.nav-enhanced .menu {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.shop-hero,
+.shop-note,
+.shop-section {
+  padding: 1.15rem;
+}
+
+.shop-hero {
+  margin-top: 0.75rem;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(252, 242, 244, 0.98), rgba(247, 236, 232, 0.9)),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.7), transparent 34%);
+}
+
+.shop-hero__content {
+  max-width: 42rem;
+}
+
+.shop-hero h1 {
+  margin-top: 0.35rem;
+  font-size: clamp(2.3rem, 8vw, 4.3rem);
+  color: #a97873;
+}
+
+.shop-hero h1 em {
+  font-style: italic;
+  font-weight: 500;
+  color: #8d6f69;
+}
+
+.shop-hero__copy,
+.shop-note__copy,
+.shop-section__copy {
+  margin-top: 0.85rem;
+  color: var(--muted);
+}
+
+.shop-note__title {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.shop-section__head h2 {
+  font-size: clamp(2rem, 6.5vw, 3rem);
+}
+
+.cardGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 1rem;
+}
+
+.cardGrid:empty::after {
+  content: "New picks will appear here.";
+  display: block;
+  padding: 1.15rem;
+  border: 1px dashed rgba(184, 146, 139, 0.28);
+  border-radius: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.productCard {
+  overflow: hidden;
+  border-radius: 22px;
+  background: rgba(255, 252, 250, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.productCard__imgLink {
+  display: block;
+}
+
+.productCard__img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.productCard__body {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+}
+
+.productCard__eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.productCard__top {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.productCard__title {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.productCard__price {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.productCard__copy {
+  color: var(--muted);
+}
+
+.productCard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: auto;
+}
+
+.productCard__link {
+  min-height: 42px;
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.productCard__link--soft {
+  border: 1px solid rgba(184, 146, 139, 0.28);
+  background: rgba(255, 248, 245, 0.72);
+  color: var(--text);
+}
+
+.productCard__link--primary {
+  border: 1px solid rgba(184, 146, 139, 0.22);
+  background: rgba(244, 233, 229, 0.84);
+  color: var(--accent);
 }
 
 .site-footer {
@@ -591,9 +783,11 @@ body.nav-enhanced .menu {
   .featured-card:hover,
   .blog-card:hover,
   .product-card:hover,
+  .productCard:hover,
   .hero-link:hover,
   .blog-read-more:hover,
   .product-cta:hover,
+  .productCard__link:hover,
   .back-blog:hover,
   .product-back:hover {
     transform: translateY(-3px);
@@ -637,6 +831,12 @@ body.nav-enhanced .menu {
 
   .product-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shop-hero,
+  .shop-note,
+  .shop-section {
+    padding: 1.35rem;
   }
 
   .site-footer {
