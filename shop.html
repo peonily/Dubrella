@@ -22,9 +22,7 @@
     .site-header { position: sticky; top: 0; z-index: 110; background: rgba(255, 246, 250, 0.96); border-bottom: 1px solid rgba(122, 74, 97, 0.14); }
     .nav { min-height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
   </style>
-  <link rel="preload" href="styles.css" as="style">
-  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="ambient-shape ambient-shape--one" aria-hidden="true"></div>
@@ -63,6 +61,44 @@
       </p>
     </section>
 
+    <section class="shop-browser section section-shell reveal" aria-labelledby="shop-browser-title">
+      <div class="shop-browser__head">
+        <p class="eyebrow">Browse</p>
+        <h2 id="shop-browser-title">Shop by category</h2>
+        <p class="shop-browser__copy">Each category shows up to 5 products per page so the catalog stays easy to scan.</p>
+      </div>
+      <nav class="shopCategoryNav" aria-label="Shop categories">
+        <a class="shopCategoryNav__link" href="#knits" data-shop-category-link="knits">
+          <span>Knits</span>
+          <strong class="shopCategoryNav__count" data-shop-category-count>0</strong>
+        </a>
+        <a class="shopCategoryNav__link" href="#dresses" data-shop-category-link="dresses">
+          <span>Dresses</span>
+          <strong class="shopCategoryNav__count" data-shop-category-count>0</strong>
+        </a>
+        <a class="shopCategoryNav__link" href="#tops" data-shop-category-link="tops">
+          <span>Tops</span>
+          <strong class="shopCategoryNav__count" data-shop-category-count>0</strong>
+        </a>
+        <a class="shopCategoryNav__link" href="#outer" data-shop-category-link="outer">
+          <span>Outer</span>
+          <strong class="shopCategoryNav__count" data-shop-category-count>0</strong>
+        </a>
+        <a class="shopCategoryNav__link" href="#bottoms" data-shop-category-link="bottoms">
+          <span>Bottoms</span>
+          <strong class="shopCategoryNav__count" data-shop-category-count>0</strong>
+        </a>
+        <a class="shopCategoryNav__link" href="#shoes" data-shop-category-link="shoes">
+          <span>Shoes</span>
+          <strong class="shopCategoryNav__count" data-shop-category-count>0</strong>
+        </a>
+        <a class="shopCategoryNav__link" href="#bags" data-shop-category-link="bags">
+          <span>Bags</span>
+          <strong class="shopCategoryNav__count" data-shop-category-count>0</strong>
+        </a>
+      </nav>
+    </section>
+
     <section class="shop-section pickSection section section-shell reveal" id="knits">
       <div class="shop-section__head">
         <p class="eyebrow">Category</p>
@@ -78,7 +114,7 @@
             <p class="productCard__eyebrow">Knits Edit</p>
             <div class="productCard__top">
               <h3 class="productCard__title">CIDER Wool-Blend Knit V-Neck Two Tone Solid Button Oversized Cardigan</h3>
-              <div class="productCard__price">$37.99</div>
+              <div class="productCard__price">Check The Latest Price on Amazon</div>
             </div>
             <p class="productCard__copy">A soft cardigan pick that layers easily over skirts, trousers, and tonal knit outfits.</p>
             <div class="productCard__actions">
@@ -87,6 +123,10 @@
             </div>
           </div>
         </article>
+      </div>
+      <div class="shop-section__footer">
+        <p class="shop-section__count" data-category-count></p>
+        <div class="shopPagination" data-shop-pagination></div>
       </div>
     </section>
 
@@ -97,6 +137,30 @@
         <p class="shop-section__copy">Romantic silhouettes and occasion-ready pieces with a clean, modern finish.</p>
       </div>
       <div class="cardGrid">
+        <article class="productCard">
+          <a class="productCard__imgLink" href="dresses-r-vivimos-women-summer-half-sleeve-cotton-ruffled-vintage-elegant-backless-a-line-flowy-long-dresses.html" aria-label="View R.Vivimos Women Summer Half Sleeve Cotton Ruffled Vintage Elegant Backless A Line Flowy Long Dresses details">
+            <img
+              class="productCard__img"
+              src="https://m.media-amazon.com/images/I/71TnaYFVw-L._AC_SY550_.jpg"
+              alt="R.Vivimos Women Summer Half Sleeve Cotton Ruffled Vintage Elegant Backless A Line Flowy Long Dresses fashion product photo"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            >
+          </a>
+          <div class="productCard__body">
+            <p class="productCard__eyebrow">Dresses Edit</p>
+            <div class="productCard__top">
+              <h3 class="productCard__title">R.Vivimos Women Summer Half Sleeve Cotton Ruffled Vintage Elegant Backless A Line Flowy Long Dresses</h3>
+              <div class="productCard__price">Check the latest price on Amazon</div>
+            </div>
+            <p class="productCard__copy">A polished R.Vivimos Women Summer Half Sleeve Cotton Ruffled Vintage Elegant Backless A Line Flowy Long Dresses pick for soft, modern wardrobes and...</p>
+            <div class="productCard__actions">
+              <a class="productCard__link productCard__link--soft" href="dresses-r-vivimos-women-summer-half-sleeve-cotton-ruffled-vintage-elegant-backless-a-line-flowy-long-dresses.html">Details</a>
+              <a class="productCard__link productCard__link--primary" href="https://www.amazon.com/R-Vivimos-Ruffled-Vintage-Backless-1-Floral/dp/B0CCKR2PHR/146-4102081-3011833?pd_rd_w=G96Qd&amp;content-id=amzn1.sym.3d5af8a3-cce9-42ea-9ba5-183bb8c2673b&amp;pf_rd_p=3d5af8a3-cce9-42ea-9ba5-183bb8c2673b&amp;pf_rd_r=VYVWSF1TDF1FHA4JACGP&amp;pd_rd_wg=L3kCh&amp;pd_rd_r=64a698f9-b9d6-41d2-a3da-12449930e82c&amp;pd_rd_i=B0CCKR2PHR&amp;th=1&amp;psc=1" target="_blank" rel="noopener noreferrer nofollow sponsored">View on Amazon</a>
+            </div>
+          </div>
+        </article>
         <article class="productCard">
           <a class="productCard__imgLink" href="dresses-cider-floral-midi-dress-women-s-summer-square-neck-puff-sleeve-slit-dresses.html" aria-label="View CIDER Floral Midi Dress Women&#39;s Summer Square Neck Puff Sleeve Slit Dresses details">
             <img
@@ -112,7 +176,7 @@
             <p class="productCard__eyebrow">Dresses Edit</p>
             <div class="productCard__top">
               <h3 class="productCard__title">CIDER Floral Midi Dress Women&#39;s Summer Square Neck Puff Sleeve Slit Dresses</h3>
-              <div class="productCard__price">$49.99</div>
+              <div class="productCard__price">Check The Latest Price on Amazon</div>
             </div>
             <p class="productCard__copy">A polished CIDER Floral Midi Dress Women&#39;s Summer Square Neck Puff Sleeve Slit Dresses pick for soft, modern wardrobes and repeatable everyday styling.</p>
             <div class="productCard__actions">
@@ -136,7 +200,7 @@
             <p class="productCard__eyebrow">Dresses Edit</p>
             <div class="productCard__top">
               <h3 class="productCard__title">CIDER Womens Floral Summer Dresses Square Neck Sleeveless Midi A Line Casual Sundress</h3>
-              <div class="productCard__price">$39.99</div>
+              <div class="productCard__price">Check The Latest Price on Amazon</div>
             </div>
             <p class="productCard__copy">A polished CIDER Womens Floral Summer Dresses Square Neck Sleeveless Midi A Line Casual Sundress pick for soft, modern wardrobes and repeatable everyday...</p>
             <div class="productCard__actions">
@@ -153,7 +217,7 @@
             <p class="productCard__eyebrow">Dresses Edit</p>
             <div class="productCard__top">
               <h3 class="productCard__title">CIDER Women's Summer Cocktail Dress - Tube Ruched Ruffle Mini Dress</h3>
-              <div class="productCard__price">$38.99</div>
+              <div class="productCard__price">Check The Latest Price on Amazon</div>
             </div>
             <p class="productCard__copy">A strapless ruched mini with ruffle detail that fits cleanly into a feminine night-out wardrobe.</p>
             <div class="productCard__actions">
@@ -162,6 +226,10 @@
             </div>
           </div>
         </article>
+      </div>
+      <div class="shop-section__footer">
+        <p class="shop-section__count" data-category-count></p>
+        <div class="shopPagination" data-shop-pagination></div>
       </div>
     </section>
 
@@ -172,6 +240,10 @@
         <p class="shop-section__copy">Blouses, camis, and fitted layers for polished softness.</p>
       </div>
       <div class="cardGrid"></div>
+      <div class="shop-section__footer">
+        <p class="shop-section__count" data-category-count></p>
+        <div class="shopPagination" data-shop-pagination></div>
+      </div>
     </section>
 
     <section class="shop-section pickSection section section-shell reveal" id="outer">
@@ -181,6 +253,10 @@
         <p class="shop-section__copy">Refined outer layers for structure without losing softness.</p>
       </div>
       <div class="cardGrid"></div>
+      <div class="shop-section__footer">
+        <p class="shop-section__count" data-category-count></p>
+        <div class="shopPagination" data-shop-pagination></div>
+      </div>
     </section>
 
     <section class="shop-section pickSection section section-shell reveal" id="bottoms">
@@ -205,7 +281,7 @@
             <p class="productCard__eyebrow">Bottoms Edit</p>
             <div class="productCard__top">
               <h3 class="productCard__title">CIDER Women&#39;s Wide Leg Sweatpants Baggy Drawstring High Waisted Joggers Lounge Sweat Pants with Pockets 2026 Spring</h3>
-              <div class="productCard__price">$31.99</div>
+              <div class="productCard__price">Check The Latest Price on Amazon</div>
             </div>
             <p class="productCard__copy">A polished CIDER Women&#39;s Wide Leg Sweatpants Baggy Drawstring High Waisted Joggers Lounge Sweat Pants with Pockets 2026 Spring pick for soft, modern...</p>
             <div class="productCard__actions">
@@ -213,7 +289,12 @@
               <a class="productCard__link productCard__link--primary" href="https://amzn.to/4bxVHa2" target="_blank" rel="noopener noreferrer nofollow sponsored">View on Amazon</a>
             </div>
           </div>
-        </article></div>
+        </article>
+      </div>
+      <div class="shop-section__footer">
+        <p class="shop-section__count" data-category-count></p>
+        <div class="shopPagination" data-shop-pagination></div>
+      </div>
     </section>
 
     <section class="shop-section pickSection section section-shell reveal" id="shoes">
@@ -223,6 +304,10 @@
         <p class="shop-section__copy">Shoes that keep the silhouette clean, light, and wearable.</p>
       </div>
       <div class="cardGrid"></div>
+      <div class="shop-section__footer">
+        <p class="shop-section__count" data-category-count></p>
+        <div class="shopPagination" data-shop-pagination></div>
+      </div>
     </section>
 
     <section class="shop-section pickSection section section-shell reveal" id="bags">
@@ -232,6 +317,10 @@
         <p class="shop-section__copy">Soft-structured bags and refined accessories for a finished look.</p>
       </div>
       <div class="cardGrid"></div>
+      <div class="shop-section__footer">
+        <p class="shop-section__count" data-category-count></p>
+        <div class="shopPagination" data-shop-pagination></div>
+      </div>
     </section>
   </main>
 

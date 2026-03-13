@@ -10,6 +10,7 @@ const SITE_NAME = "Dubrella";
 const SITE_URL = String(process.env.SITE_URL || "https://your-domain.com").replace(/\/+$/, "");
 const PORT = Number(process.env.PORT || 4311);
 const DOMAIN_VERIFY = "3f9329f4428870c58c8b29e81cf2c699";
+const AMAZON_PRICE_LABEL = "Check the latest price on Amazon";
 
 const AMAZON_HEADERS = {
   "user-agent":
@@ -132,10 +133,6 @@ function truncate(value, maxLength) {
   const shortened = value.slice(0, maxLength - 1);
   const lastSpace = shortened.lastIndexOf(" ");
   return `${shortened.slice(0, Math.max(lastSpace, 0))}...`;
-}
-
-function formatMoney(value) {
-  return value ? `$${value}` : "Check latest price";
 }
 
 function normalizeMoneyValue(value) {
@@ -440,8 +437,7 @@ function createAnalysis(input, amazonData, sections) {
     cardCopy,
     pageSummary,
     bullets: amazonData.bullets.length ? amazonData.bullets : [cardCopy],
-    price: amazonData.price,
-    priceText: formatMoney(amazonData.price),
+    priceText: AMAZON_PRICE_LABEL,
     ctaLabel: "View on Amazon",
     availability: amazonData.availability,
     pageFile,
@@ -466,7 +462,10 @@ async function findExistingProductFile({ asin, affiliateUrl, pageFile }) {
 
   for (const file of htmlFiles) {
     const content = await fs.readFile(path.join(ROOT_DIR, file), "utf8");
-    if (!/og:type"\s+content="product"/i.test(content)) {
+    if (
+      !/og:type"\s+content="product"/i.test(content) &&
+      !/name="page:type"\s+content="product"/i.test(content)
+    ) {
       continue;
     }
 
@@ -578,18 +577,6 @@ function renderProductPage(data) {
     sku: data.asin,
     category: data.sectionLabel,
     url: data.productUrl,
-    offers: {
-      "@type": "Offer",
-      url: data.affiliateUrl,
-      priceCurrency: "USD",
-      price: data.price,
-      availability: `https://schema.org/${data.availability}`,
-      itemCondition: "https://schema.org/NewCondition",
-      seller: {
-        "@type": "Organization",
-        name: "Amazon",
-      },
-    },
   };
 
   return `<!doctype html>
@@ -602,26 +589,21 @@ function renderProductPage(data) {
   <meta name="description" content="${escapeHtml(data.metaDescription)}">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="${escapeHtml(data.productUrl)}">
+  <meta name="page:type" content="product">
 
-  <meta property="og:type" content="product">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
   <meta property="og:site_name" content="${SITE_NAME}">
   <meta property="og:title" content="${escapeHtml(data.ogTitle)}">
   <meta property="og:description" content="${escapeHtml(data.ogDescription)}">
   <meta property="og:url" content="${escapeHtml(data.productUrl)}">
 ${renderOgImageTags(data)}
-  <meta property="product:price:amount" content="${escapeHtml(data.price)}">
-  <meta property="product:price:currency" content="USD">
-  <meta property="og:price:amount" content="${escapeHtml(data.price)}">
-  <meta property="og:price:currency" content="USD">
-  <meta property="product:availability" content="${data.availability === "InStock" ? "in stock" : "out of stock"}">
-  <meta property="product:brand" content="${escapeHtml(data.brand)}">
-  <meta property="product:retailer_item_id" content="${escapeHtml(data.asin)}">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(data.ogTitle)}">
   <meta name="twitter:description" content="${escapeHtml(data.twitterDescription)}">
   <meta name="twitter:image" content="${escapeHtml(data.imageUrl)}">
-  <meta name="pinterest-rich-pin" content="true">
+  <meta name="twitter:image:alt" content="${escapeHtml(data.altText)}">
 
   <script type="application/ld+json">${safeJson(productJson)}</script>
 
@@ -668,7 +650,7 @@ ${gallery.media}
           <ul class="product-specs">
             <li><strong>Brand:</strong> ${escapeHtml(data.brand)}</li>
             <li><strong>ASIN:</strong> ${escapeHtml(data.asin)}</li>
-            <li><strong>Price:</strong> ${escapeHtml(data.priceText)}</li>
+            <li>${escapeHtml(data.priceText)}</li>
             <li><strong>Availability:</strong> ${escapeHtml(data.availability === "InStock" ? "In stock" : "Out of stock")}</li>
           </ul>
           <div class="product-actions">
@@ -679,7 +661,7 @@ ${gallery.media}
             Affiliate disclosure: As an Amazon Associate, Dubrella may earn from qualifying purchases.
           </p>
           <p class="product-data-note">
-            Product title, price, and stock status were last verified on ${escapeHtml(data.publishedAt)}.
+            Product title and stock status were last verified on ${escapeHtml(data.publishedAt)}.
           </p>
         </div>
       </div>
@@ -869,12 +851,6 @@ function createServer() {
 
       if (req.method === "POST" && requestUrl.pathname === "/api/publish") {
         const analysis = await analyzeAffiliateInput(await readRequestBody(req));
-        if (!analysis.price) {
-          throw new Error(
-            "Could not extract a live Amazon price. Pinterest product metadata needs price metadata, so publishing was blocked.",
-          );
-        }
-
         const pageFile = await writeProductFiles(analysis);
         json(res, 200, {
           ok: true,

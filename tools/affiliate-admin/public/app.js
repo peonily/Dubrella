@@ -71,9 +71,7 @@ function renderAnalysis(analysis) {
   els.previewTitle.textContent = analysis.shortTitle;
   els.previewSection.textContent = `Category: ${analysis.sectionLabel}`;
   els.previewAsin.textContent = `ASIN: ${analysis.asin}`;
-  els.previewPrice.textContent = analysis.price
-    ? `Price found: $${analysis.price}`
-    : "Price not found. Pinterest product metadata needs a static price, and publish will be blocked until one is extracted.";
+  els.previewPrice.textContent = `Price display: ${analysis.priceText}`;
   els.previewFile.textContent = analysis.pageFile;
   els.previewUrl.textContent = analysis.productUrl;
   els.previewImageCount.textContent = `${analysis.imageUrls.length} image${analysis.imageUrls.length === 1 ? "" : "s"}`;
