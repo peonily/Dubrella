@@ -6,6 +6,10 @@ function getCurrentHash() {
   return window.location.hash.toLowerCase();
 }
 
+function getQueryParam(name) {
+  return new URLSearchParams(window.location.search).get(name)?.toLowerCase() || "";
+}
+
 function isHomePage() {
   const file = getCurrentFile();
   return file === "" || file === "index.html";
@@ -224,11 +228,141 @@ function updateBottomNavActiveStates() {
   });
 }
 
+function setupShopCatalog() {
+  if (getCurrentFile() !== "shop.html") return;
+
+  const sections = Array.from(document.querySelectorAll(".shop-section"));
+  if (!sections.length) return;
+
+  const pageSize = 5;
+  const categoryLinks = Array.from(document.querySelectorAll("[data-shop-category-link]"));
+
+  const setActiveCategory = (categoryId) => {
+    sections.forEach((section) => {
+      section.classList.toggle("is-active-category", section.id === categoryId);
+    });
+
+    categoryLinks.forEach((link) => {
+      const isActive = link.dataset.shopCategoryLink === categoryId;
+      link.classList.toggle("active", isActive);
+      if (isActive) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  };
+
+  sections.forEach((section) => {
+    const cards = Array.from(section.querySelectorAll(".productCard"));
+    const countNode = section.querySelector("[data-category-count]");
+    const paginationNode = section.querySelector("[data-shop-pagination]");
+    const navCountNode = document.querySelector(`[data-shop-category-link="${section.id}"] [data-shop-category-count]`);
+    const totalProducts = cards.length;
+    const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
+    let currentPage = 1;
+
+    if (navCountNode) {
+      navCountNode.textContent = String(totalProducts);
+    }
+
+    const updateCount = (startIndex, endIndex) => {
+      if (!countNode) return;
+
+      if (totalProducts === 0) {
+        countNode.textContent = "No products in this category yet.";
+        return;
+      }
+
+      if (totalPages === 1) {
+        countNode.textContent = `${totalProducts} product${totalProducts === 1 ? "" : "s"} in this category.`;
+        return;
+      }
+
+      countNode.textContent = `Showing ${startIndex + 1}-${endIndex} of ${totalProducts} products.`;
+    };
+
+    const renderPagination = () => {
+      if (!paginationNode) return;
+
+      paginationNode.innerHTML = "";
+
+      if (totalProducts <= pageSize) {
+        paginationNode.hidden = true;
+        return;
+      }
+
+      paginationNode.hidden = false;
+
+      const makeButton = (label, nextPage, options = {}) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "shopPagination__button";
+        button.textContent = label;
+        button.disabled = Boolean(options.disabled);
+        if (options.active) {
+          button.classList.add("is-active");
+          button.setAttribute("aria-current", "page");
+        }
+        button.addEventListener("click", () => {
+          currentPage = nextPage;
+          render();
+        });
+        paginationNode.appendChild(button);
+      };
+
+      makeButton("Prev", currentPage - 1, { disabled: currentPage === 1 });
+
+      for (let page = 1; page <= totalPages; page += 1) {
+        makeButton(String(page), page, { active: page === currentPage });
+      }
+
+      makeButton("Next", currentPage + 1, { disabled: currentPage === totalPages });
+    };
+
+    const render = () => {
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, totalProducts);
+
+      cards.forEach((card, index) => {
+        card.hidden = index < startIndex || index >= endIndex;
+      });
+
+      updateCount(startIndex, endIndex);
+      renderPagination();
+    };
+
+    render();
+  });
+
+  const syncActiveCategoryFromLocation = () => {
+    const requestedCategory = getQueryParam("category");
+    const hashCategory = getCurrentHash().replace("#", "");
+    const activeCategory = sections.find((section) => section.id === hashCategory)
+      ? hashCategory
+      : sections.find((section) => section.id === requestedCategory)
+        ? requestedCategory
+        : sections[0].id;
+
+    setActiveCategory(activeCategory);
+  };
+
+  categoryLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      setActiveCategory(link.dataset.shopCategoryLink || "");
+    });
+  });
+
+  syncActiveCategoryFromLocation();
+  window.addEventListener("hashchange", syncActiveCategoryFromLocation);
+}
+
 ensureShopLinks();
 setupReveal();
 setupYear();
 setupMobileMenu();
 setupBottomNav();
+setupShopCatalog();
 updatePrimaryActiveStates();
 updateBottomNavActiveStates();
 window.addEventListener("hashchange", () => {
