@@ -587,6 +587,7 @@ body.nav-enhanced .menu {
 .shop-note,
 .shop-section {
   padding: 1.15rem;
+  scroll-margin-top: 110px;
 }
 
 .shop-hero {
