@@ -7,7 +7,25 @@ function getCurrentHash() {
 }
 
 function getQueryParam(name) {
-  return new URLSearchParams(window.location.search).get(name)?.toLowerCase() || "";
+  const search = window.location.search || "";
+  if (window.URLSearchParams) {
+    const value = new URLSearchParams(search).get(name);
+    return value ? value.toLowerCase() : "";
+  }
+
+  const raw = search.replace(/^\?/, "");
+  if (!raw) return "";
+
+  const pairs = raw.split("&");
+  for (let i = 0; i < pairs.length; i += 1) {
+    const part = pairs[i].split("=");
+    const key = decodeURIComponent(part[0] || "");
+    if (key.toLowerCase() === name.toLowerCase()) {
+      const val = decodeURIComponent(part[1] || "");
+      return val.toLowerCase();
+    }
+  }
+  return "";
 }
 
 function isHomePage() {
@@ -66,6 +84,13 @@ function ensureShopLinks() {
 function setupReveal() {
   const revealItems = document.querySelectorAll(".reveal");
   if (!revealItems.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    revealItems.forEach((item) => {
+      item.classList.add("is-visible");
+    });
+    return;
+  }
 
   const observer = new IntersectionObserver(
     (entries, observerInstance) => {
@@ -131,8 +156,8 @@ function updatePrimaryActiveStates() {
 function setupMobileMenu() {
   const body = document.body;
   const header = document.querySelector(".site-header");
-  const nav = header?.querySelector(".nav");
-  const menu = nav?.querySelector(".menu");
+  const nav = header ? header.querySelector(".nav") : null;
+  const menu = nav ? nav.querySelector(".menu") : null;
   if (!body || !header || !nav || !menu) return;
 
   body.classList.add("nav-enhanced");
@@ -392,6 +417,9 @@ function setupShopCatalog() {
   });
 
   syncActiveCategoryFromLocation();
+  if (document.body) {
+    document.body.classList.add("shop-catalog-ready");
+  }
   window.addEventListener("hashchange", syncActiveCategoryFromLocation);
 }
 

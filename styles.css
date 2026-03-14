@@ -955,11 +955,11 @@ body.nav-enhanced .menu {
 }
 
 @media (max-width: 767px) {
-  .shop-section {
+  body.shop-catalog-ready .shop-section {
     display: none;
   }
 
-  .shop-section.is-active-category {
+  body.shop-catalog-ready .shop-section.is-active-category {
     display: block;
   }
 }
