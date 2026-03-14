@@ -239,19 +239,11 @@ function setupShopCatalog() {
 
   const pageSize = 5;
   const categoryLinks = Array.from(document.querySelectorAll("[data-shop-category-link]"));
-  const mobileFilterQuery = window.matchMedia("(max-width: 767px)");
   let activeCategoryId = sections[0].id;
 
   const updateSectionVisibility = (categoryId) => {
-    if (!mobileFilterQuery.matches) {
-      sections.forEach((section) => {
-        section.hidden = false;
-      });
-      return;
-    }
-
     sections.forEach((section) => {
-      section.hidden = section.id !== categoryId;
+      section.hidden = false;
     });
 
     const activeSection = sections.find((section) => section.id === categoryId);
@@ -401,9 +393,6 @@ function setupShopCatalog() {
 
   syncActiveCategoryFromLocation();
   window.addEventListener("hashchange", syncActiveCategoryFromLocation);
-  mobileFilterQuery.addEventListener("change", () => {
-    updateSectionVisibility(activeCategoryId);
-  });
 }
 
 ensureShopLinks();
