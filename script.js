@@ -239,14 +239,38 @@ function setupShopCatalog() {
 
   const pageSize = 5;
   const categoryLinks = Array.from(document.querySelectorAll("[data-shop-category-link]"));
+  const mobileFilterQuery = window.matchMedia("(max-width: 767px)");
+  let activeCategoryId = sections[0].id;
+
+  const updateSectionVisibility = (categoryId) => {
+    if (!mobileFilterQuery.matches) {
+      sections.forEach((section) => {
+        section.hidden = false;
+      });
+      return;
+    }
+
+    sections.forEach((section) => {
+      section.hidden = section.id !== categoryId;
+    });
+
+    const activeSection = sections.find((section) => section.id === categoryId);
+    if (activeSection) {
+      activeSection.classList.add("is-visible");
+    }
+  };
 
   const setActiveCategory = (categoryId) => {
+    const resolvedCategoryId = sections.find((section) => section.id === categoryId)
+      ? categoryId
+      : sections[0].id;
+    activeCategoryId = resolvedCategoryId;
     sections.forEach((section) => {
-      section.classList.toggle("is-active-category", section.id === categoryId);
+      section.classList.toggle("is-active-category", section.id === resolvedCategoryId);
     });
 
     categoryLinks.forEach((link) => {
-      const isActive = link.dataset.shopCategoryLink === categoryId;
+      const isActive = link.dataset.shopCategoryLink === resolvedCategoryId;
       link.classList.toggle("active", isActive);
       if (isActive) {
         link.setAttribute("aria-current", "true");
@@ -254,6 +278,8 @@ function setupShopCatalog() {
         link.removeAttribute("aria-current");
       }
     });
+
+    updateSectionVisibility(resolvedCategoryId);
   };
 
   sections.forEach((section) => {
@@ -375,6 +401,9 @@ function setupShopCatalog() {
 
   syncActiveCategoryFromLocation();
   window.addEventListener("hashchange", syncActiveCategoryFromLocation);
+  mobileFilterQuery.addEventListener("change", () => {
+    updateSectionVisibility(activeCategoryId);
+  });
 }
 
 ensureShopLinks();
