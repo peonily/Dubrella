@@ -7,10 +7,11 @@ const ROOT_DIR = path.resolve(__dirname, "..", "..");
 const PUBLIC_DIR = path.join(__dirname, "public");
 const SHOP_PATH = path.join(ROOT_DIR, "shop.html");
 const SITE_NAME = "Dubrella";
-const SITE_URL = String(process.env.SITE_URL || "https://your-domain.com").replace(/\/+$/, "");
+const SITE_URL = String(process.env.SITE_URL || "https://dubrella.pages.dev").replace(/\/+$/, "");
 const PORT = Number(process.env.PORT || 4311);
 const DOMAIN_VERIFY = "3f9329f4428870c58c8b29e81cf2c699";
 const AMAZON_PRICE_LABEL = "Check the latest price on Amazon";
+const AMAZON_VIEW_LABEL = "VIEW ON AMAZON";
 
 const AMAZON_HEADERS = {
   "user-agent":
@@ -225,6 +226,14 @@ function extractImageSize(url) {
   return { width: width?.[1] || "", height: height?.[1] || "" };
 }
 
+function formatAvailabilityLabel(availability) {
+  return availability === "InStock" ? "In stock" : "Out of stock";
+}
+
+function productAvailabilityMetaValue(availability) {
+  return availability === "InStock" ? "instock" : "outofstock";
+}
+
 function normalizeImageUrls(input) {
   const values = Array.isArray(input) ? input : [input];
   const cleaned = [];
@@ -437,7 +446,9 @@ function createAnalysis(input, amazonData, sections) {
     cardCopy,
     pageSummary,
     bullets: amazonData.bullets.length ? amazonData.bullets : [cardCopy],
-    priceText: AMAZON_PRICE_LABEL,
+    price: amazonData.price,
+    priceCurrency: "USD",
+    priceText: AMAZON_VIEW_LABEL,
     ctaLabel: "View on Amazon",
     availability: amazonData.availability,
     pageFile,
@@ -493,6 +504,24 @@ function renderOgImageTags(data) {
       }
     }
   });
+
+  return tags.join("\n");
+}
+
+function renderProductMetaTags(data) {
+  const tags = [
+    `  <meta property="product:retailer_item_id" content="${escapeHtml(data.asin)}">`,
+    `  <meta property="product:brand" content="${escapeHtml(data.brand)}">`,
+    `  <meta property="product:condition" content="new">`,
+    `  <meta property="product:availability" content="${escapeHtml(productAvailabilityMetaValue(data.availability))}">`,
+  ];
+
+  if (data.price) {
+    tags.push(`  <meta property="product:price:amount" content="${escapeHtml(data.price)}">`);
+    tags.push(`  <meta property="product:price:currency" content="${escapeHtml(data.priceCurrency)}">`);
+    tags.push(`  <meta property="og:price:amount" content="${escapeHtml(data.price)}">`);
+    tags.push(`  <meta property="og:price:currency" content="${escapeHtml(data.priceCurrency)}">`);
+  }
 
   return tags.join("\n");
 }
@@ -564,19 +593,82 @@ ${thumbButtons}
 
 function renderProductPage(data) {
   const gallery = renderGalleryMarkup(data);
-  const productJson = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: data.fullTitle,
-    image: data.imageUrls,
-    description: data.metaDescription,
-    brand: {
-      "@type": "Brand",
-      name: data.brand,
+  const organizationId = `${SITE_URL}/#organization`;
+  const websiteId = `${SITE_URL}/#website`;
+  const webpageId = `${data.productUrl}#webpage`;
+  const productId = `${data.productUrl}#product`;
+  const offerJson = {
+    "@type": "Offer",
+    url: data.affiliateUrl,
+    availability: data.availability === "InStock" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    itemCondition: "https://schema.org/NewCondition",
+    priceCurrency: data.priceCurrency,
+    seller: {
+      "@type": "Organization",
+      name: "Amazon",
     },
-    sku: data.asin,
-    category: data.sectionLabel,
-    url: data.productUrl,
+  };
+
+  if (data.price) {
+    offerJson.price = data.price;
+  }
+
+  const richPinsGraph = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": organizationId,
+        name: SITE_NAME,
+        url: SITE_URL,
+      },
+      {
+        "@type": "WebSite",
+        "@id": websiteId,
+        url: SITE_URL,
+        name: SITE_NAME,
+        publisher: {
+          "@id": organizationId,
+        },
+      },
+      {
+        "@type": "WebPage",
+        "@id": webpageId,
+        url: data.productUrl,
+        name: data.ogTitle,
+        description: data.metaDescription,
+        isPartOf: {
+          "@id": websiteId,
+        },
+        about: {
+          "@id": productId,
+        },
+        mainEntity: {
+          "@id": productId,
+        },
+        publisher: {
+          "@id": organizationId,
+        },
+      },
+      {
+        "@type": "Product",
+        "@id": productId,
+        name: data.fullTitle,
+        image: data.imageUrls,
+        description: data.metaDescription,
+        sku: data.asin,
+        category: data.sectionLabel,
+        url: data.productUrl,
+        mainEntityOfPage: {
+          "@id": webpageId,
+        },
+        brand: {
+          "@type": "Brand",
+          name: data.brand,
+        },
+        offers: offerJson,
+      },
+    ],
   };
 
   return `<!doctype html>
@@ -590,14 +682,16 @@ function renderProductPage(data) {
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="${escapeHtml(data.productUrl)}">
   <meta name="page:type" content="product">
+  <meta name="pinterest-rich-pin" content="true">
 
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="product">
   <meta property="og:locale" content="en_US">
   <meta property="og:site_name" content="${SITE_NAME}">
   <meta property="og:title" content="${escapeHtml(data.ogTitle)}">
   <meta property="og:description" content="${escapeHtml(data.ogDescription)}">
   <meta property="og:url" content="${escapeHtml(data.productUrl)}">
 ${renderOgImageTags(data)}
+${renderProductMetaTags(data)}
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(data.ogTitle)}">
@@ -605,7 +699,7 @@ ${renderOgImageTags(data)}
   <meta name="twitter:image" content="${escapeHtml(data.imageUrl)}">
   <meta name="twitter:image:alt" content="${escapeHtml(data.altText)}">
 
-  <script type="application/ld+json">${safeJson(productJson)}</script>
+  <script type="application/ld+json">${safeJson(richPinsGraph)}</script>
 
   <link rel="icon" type="image/png" href="assets/DUBRELLA.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -651,7 +745,7 @@ ${gallery.media}
             <li><strong>Brand:</strong> ${escapeHtml(data.brand)}</li>
             <li><strong>ASIN:</strong> ${escapeHtml(data.asin)}</li>
             <li>${escapeHtml(data.priceText)}</li>
-            <li><strong>Availability:</strong> ${escapeHtml(data.availability === "InStock" ? "In stock" : "Out of stock")}</li>
+            <li><strong>Availability:</strong> ${escapeHtml(formatAvailabilityLabel(data.availability))}</li>
           </ul>
           <div class="product-actions">
             <a class="hero-link" href="${escapeHtml(data.affiliateUrl)}" target="_blank" rel="nofollow sponsored noopener">${escapeHtml(data.ctaLabel)}</a>
@@ -661,7 +755,7 @@ ${gallery.media}
             Affiliate disclosure: As an Amazon Associate, Dubrella may earn from qualifying purchases.
           </p>
           <p class="product-data-note">
-            Product title and stock status were last verified on ${escapeHtml(data.publishedAt)}.
+            Product title${data.price ? ", price," : ""} and stock status were last verified on ${escapeHtml(data.publishedAt)}.
           </p>
         </div>
       </div>
