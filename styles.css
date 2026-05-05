@@ -718,11 +718,12 @@ body.nav-enhanced .menu {
   display: block;
   aspect-ratio: 4 / 3;
   overflow: hidden;
+  background: #fbf7f0;
 }
 
 .productCard__img {
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.5s ease;
 }
 
