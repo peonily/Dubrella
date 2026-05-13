@@ -189,6 +189,56 @@ body.nav-enhanced .menu {
   color: var(--accent);
 }
 
+.header-search {
+  width: min(100%, 28rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem;
+}
+
+.header-search__input {
+  min-width: 0;
+  height: 2.35rem;
+  padding: 0 0.95rem;
+  border: 1px solid rgba(168, 128, 124, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 252, 249, 0.92);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.82rem;
+  outline: none;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background-color 0.22s ease;
+}
+
+.header-search__input::placeholder {
+  color: rgba(147, 115, 108, 0.8);
+}
+
+.header-search__input:focus {
+  border-color: rgba(185, 135, 128, 0.55);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(185, 135, 128, 0.14);
+}
+
+.header-search__button {
+  min-height: 2.35rem;
+  padding: 0 0.95rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(140deg, #b89267, #89633d);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 20px rgba(120, 87, 54, 0.18);
+}
+
 .ambient-shape {
   position: fixed;
   inset: auto;
@@ -892,30 +942,45 @@ body.nav-enhanced .menu {
 
 .site-footer {
   width: min(var(--container-max), calc(100% - 1.8rem));
-  margin: 0 auto 1.25rem;
-  padding: 1.1rem 1.15rem;
-  border-radius: 24px;
-  background: rgba(255, 251, 248, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: var(--shadow-soft);
-  display: grid;
-  gap: 0.75rem;
-  font-size: 0.88rem;
+  margin: 3.4rem auto 2rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: rgba(255, 252, 246, 0.84);
+  box-shadow: 0 10px 25px rgba(56, 44, 30, 0.08);
+  padding: 1rem 1.15rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
-.footer-disclosure,
-.footer-links a {
+.site-footer strong {
+  color: var(--text);
+}
+
+.footer-disclosure {
+  display: inline-block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
   color: var(--muted);
 }
 
 .footer-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .footer-links a {
+  color: var(--muted);
   text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--text);
 }
 
 .reveal {
@@ -974,6 +1039,10 @@ body.nav-enhanced .menu {
     font-size: 0.68rem;
   }
 
+  .header-search {
+    width: min(100%, 34rem);
+  }
+
   .section {
     margin-top: 2.4rem;
   }
@@ -1015,8 +1084,7 @@ body.nav-enhanced .menu {
   }
 
   .site-footer {
-    grid-template-columns: 1.4fr 1fr auto;
-    align-items: start;
+    align-items: flex-start;
   }
 }
 

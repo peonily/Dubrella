@@ -117,6 +117,65 @@ function setupYear() {
   }
 }
 
+function setupSharedFooter() {
+  const footerMount = document.querySelector("[data-shared-footer]") || document.querySelector("footer.site-footer");
+  if (!footerMount) return;
+
+  footerMount.outerHTML = `
+    <footer class="site-footer">
+      <div>
+        <strong>Dubrella</strong><br>
+        <span>Curated feminine fashion for dreamy, modern wardrobes.</span><br>
+        <span class="footer-disclosure">This website is a participant in the Amazon Services LLC Associates Program. As an Amazon Associate, we earn from qualifying purchases at no additional cost to you.</span>
+      </div>
+      <div class="footer-links">
+        <a href="index.html#home">Home</a>
+        <a href="blog.html">Blog</a>
+        <a href="about.html">About Us</a>
+        <a href="index.html#categories">Categories</a>
+        <a href="contact.html">Contact Us</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="affiliate-disclosure.html">Affiliate Disclosure</a>
+      </div>
+      <div>&copy; <span data-year></span> Dubrella</div>
+    </footer>
+  `.trim();
+}
+
+function setupHeaderSearch() {
+  const nav = document.querySelector(".site-header .nav");
+  if (!nav || nav.querySelector(".header-search")) return;
+
+  const form = document.createElement("form");
+  form.className = "header-search";
+  form.setAttribute("role", "search");
+  form.setAttribute("aria-label", "Search Dubrella products");
+
+  const input = document.createElement("input");
+  input.className = "header-search__input";
+  input.type = "search";
+  input.name = "search";
+  input.placeholder = "Search dresses, bags, shoes...";
+  input.autocomplete = "off";
+  input.value = getQueryParam("search");
+
+  const button = document.createElement("button");
+  button.className = "header-search__button";
+  button.type = "submit";
+  button.setAttribute("aria-label", "Search");
+  button.textContent = "Search";
+
+  form.append(input, button);
+  nav.appendChild(form);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = input.value.trim();
+    const target = query ? `shop.html?search=${encodeURIComponent(query)}` : "shop.html";
+    window.location.href = target;
+  });
+}
+
 function updatePrimaryActiveStates() {
   const links = document.querySelectorAll(".menu a");
   if (!links.length) return;
@@ -263,13 +322,18 @@ function setupShopCatalog() {
   if (!sections.length) return;
 
   const pageSize = 5;
+  const searchTerm = getQueryParam("search").trim();
   const categoryLinks = Array.from(document.querySelectorAll("[data-shop-category-link]"));
   let activeCategoryId = sections[0].id;
 
   const updateSectionVisibility = (categoryId) => {
     sections.forEach((section) => {
-      section.hidden = false;
+      section.hidden = searchTerm && section.dataset.searchMatch !== "true";
     });
+
+    if (searchTerm && !sections.some((section) => !section.hidden)) {
+      sections[0].hidden = false;
+    }
 
     const activeSection = sections.find((section) => section.id === categoryId);
     if (activeSection) {
@@ -283,11 +347,12 @@ function setupShopCatalog() {
       : sections[0].id;
     activeCategoryId = resolvedCategoryId;
     sections.forEach((section) => {
-      section.classList.toggle("is-active-category", section.id === resolvedCategoryId);
+      const isSearchMatch = searchTerm && section.dataset.searchMatch === "true";
+      section.classList.toggle("is-active-category", isSearchMatch || section.id === resolvedCategoryId);
     });
 
     categoryLinks.forEach((link) => {
-      const isActive = link.dataset.shopCategoryLink === resolvedCategoryId;
+      const isActive = !searchTerm && link.dataset.shopCategoryLink === resolvedCategoryId;
       link.classList.toggle("active", isActive);
       if (isActive) {
         link.setAttribute("aria-current", "true");
@@ -301,31 +366,44 @@ function setupShopCatalog() {
 
   sections.forEach((section) => {
     const cards = Array.from(section.querySelectorAll(".productCard"));
+    const visibleCards = searchTerm
+      ? cards.filter((card) => card.textContent.toLowerCase().includes(searchTerm))
+      : cards;
     const countNode = section.querySelector("[data-category-count]");
     const paginationNode = section.querySelector("[data-shop-pagination]");
     const navCountNode = document.querySelector(`[data-shop-category-link="${section.id}"] [data-shop-category-count]`);
-    const totalProducts = cards.length;
+    const totalProducts = visibleCards.length;
     const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
     let currentPage = 1;
 
+    if (searchTerm) {
+      section.dataset.searchMatch = totalProducts > 0 ? "true" : "false";
+    }
+
     if (navCountNode) {
-      navCountNode.textContent = String(totalProducts);
+      navCountNode.textContent = String(cards.length);
     }
 
     const updateCount = (startIndex, endIndex) => {
       if (!countNode) return;
 
       if (totalProducts === 0) {
-        countNode.textContent = "No products in this category yet.";
+        countNode.textContent = searchTerm
+          ? `No products match "${searchTerm}" in this category.`
+          : "No products in this category yet.";
         return;
       }
 
       if (totalPages === 1) {
-        countNode.textContent = `${totalProducts} product${totalProducts === 1 ? "" : "s"} in this category.`;
+        countNode.textContent = searchTerm
+          ? `${totalProducts} result${totalProducts === 1 ? "" : "s"} for "${searchTerm}".`
+          : `${totalProducts} product${totalProducts === 1 ? "" : "s"} in this category.`;
         return;
       }
 
-      countNode.textContent = `Showing ${startIndex + 1}-${endIndex} of ${totalProducts} products.`;
+      countNode.textContent = searchTerm
+        ? `Showing ${startIndex + 1}-${endIndex} of ${totalProducts} results for "${searchTerm}".`
+        : `Showing ${startIndex + 1}-${endIndex} of ${totalProducts} products.`;
     };
 
     const renderPagination = () => {
@@ -370,8 +448,9 @@ function setupShopCatalog() {
       const startIndex = (currentPage - 1) * pageSize;
       const endIndex = Math.min(startIndex + pageSize, totalProducts);
 
-      cards.forEach((card, index) => {
-        card.hidden = index < startIndex || index >= endIndex;
+      cards.forEach((card) => {
+        const visibleIndex = visibleCards.indexOf(card);
+        card.hidden = visibleIndex < startIndex || visibleIndex >= endIndex;
       });
 
       updateCount(startIndex, endIndex);
@@ -424,7 +503,9 @@ function setupShopCatalog() {
 }
 
 ensureShopLinks();
+setupHeaderSearch();
 setupReveal();
+setupSharedFooter();
 setupYear();
 setupMobileMenu();
 setupBottomNav();
