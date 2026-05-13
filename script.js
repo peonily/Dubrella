@@ -192,6 +192,7 @@ function updatePrimaryActiveStates() {
   const currentHash = getCurrentHash();
   const isBlogPage = currentFile === "blog.html" || currentFile.startsWith("blog-");
   const isAboutPage = currentFile === "about.html";
+  const isContactPage = currentFile === "contact.html";
   const isShopPage = currentFile === "shop.html" || isProductPage();
 
   links.forEach((link) => {
@@ -204,6 +205,8 @@ function updatePrimaryActiveStates() {
       isActive = isBlogPage;
     } else if (href.includes("about.html")) {
       isActive = isAboutPage;
+    } else if (href.includes("contact.html")) {
+      isActive = isContactPage;
     } else if (href.includes("#categories")) {
       isActive = isHomePage() && currentHash === "#categories";
     } else if (href.includes("#home")) {
