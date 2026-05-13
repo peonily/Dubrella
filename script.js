@@ -9,8 +9,7 @@ function getCurrentHash() {
 function getQueryParam(name) {
   const search = window.location.search || "";
   if (window.URLSearchParams) {
-    const value = new URLSearchParams(search).get(name);
-    return value ? value.toLowerCase() : "";
+    return new URLSearchParams(search).get(name) || "";
   }
 
   const raw = search.replace(/^\?/, "");
@@ -21,11 +20,14 @@ function getQueryParam(name) {
     const part = pairs[i].split("=");
     const key = decodeURIComponent(part[0] || "");
     if (key.toLowerCase() === name.toLowerCase()) {
-      const val = decodeURIComponent(part[1] || "");
-      return val.toLowerCase();
+      return decodeURIComponent(part[1] || "");
     }
   }
   return "";
+}
+
+function getNormalizedQueryParam(name) {
+  return getQueryParam(name).toLowerCase();
 }
 
 function isHomePage() {
@@ -151,8 +153,14 @@ function setupHeaderSearch() {
   form.setAttribute("role", "search");
   form.setAttribute("aria-label", "Search Dubrella products");
 
+  const label = document.createElement("label");
+  label.className = "sr-only";
+  label.setAttribute("for", "header-product-search");
+  label.textContent = "Search products";
+
   const input = document.createElement("input");
   input.className = "header-search__input";
+  input.id = "header-product-search";
   input.type = "search";
   input.name = "search";
   input.placeholder = "Search dresses, bags, shoes...";
@@ -163,9 +171,9 @@ function setupHeaderSearch() {
   button.className = "header-search__button";
   button.type = "submit";
   button.setAttribute("aria-label", "Search");
-  button.textContent = "Search";
+  button.innerHTML = '<span aria-hidden="true">Search</span>';
 
-  form.append(input, button);
+  form.append(label, input, button);
   nav.appendChild(form);
 
   form.addEventListener("submit", (event) => {
@@ -322,9 +330,20 @@ function setupShopCatalog() {
   if (!sections.length) return;
 
   const pageSize = 5;
-  const searchTerm = getQueryParam("search").trim();
+  const rawSearchTerm = getQueryParam("search").trim();
+  const searchTerm = rawSearchTerm.toLowerCase();
   const categoryLinks = Array.from(document.querySelectorAll("[data-shop-category-link]"));
+  const browserCopy = document.querySelector(".shop-browser__copy");
   let activeCategoryId = sections[0].id;
+
+  if (searchTerm && browserCopy) {
+    const resetLink = document.createElement("a");
+    resetLink.className = "shop-search-reset";
+    resetLink.href = "shop.html";
+    resetLink.textContent = "Clear search";
+    browserCopy.textContent = `Showing catalog matches for "${rawSearchTerm}".`;
+    browserCopy.append(" ", resetLink);
+  }
 
   const updateSectionVisibility = (categoryId) => {
     sections.forEach((section) => {
@@ -472,7 +491,7 @@ function setupShopCatalog() {
   };
 
   const syncActiveCategoryFromLocation = () => {
-    const requestedCategory = getQueryParam("category");
+    const requestedCategory = getNormalizedQueryParam("category");
     const hashCategory = getCurrentHash().replace("#", "");
     const activeCategory = sections.find((section) => section.id === hashCategory)
       ? hashCategory
