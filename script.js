@@ -42,6 +42,11 @@ function isProductPage() {
   );
 }
 
+function isShopPage() {
+  const file = getCurrentFile();
+  return file === "shop" || file === "shop.html";
+}
+
 function ensureShopLinks() {
   document.querySelectorAll(".menu").forEach((menu) => {
     if (menu.querySelector('a[href="shop.html"]')) return;
@@ -193,14 +198,14 @@ function updatePrimaryActiveStates() {
   const isBlogPage = currentFile === "blog.html" || currentFile.startsWith("blog-");
   const isAboutPage = currentFile === "about.html";
   const isContactPage = currentFile === "contact.html";
-  const isShopPage = currentFile === "shop.html" || isProductPage();
+  const isShopLinkActive = isShopPage() || isProductPage();
 
   links.forEach((link) => {
     const href = (link.getAttribute("href") || "").toLowerCase();
     let isActive = false;
 
     if (href === "shop.html") {
-      isActive = isShopPage;
+      isActive = isShopLinkActive;
     } else if (href.includes("blog.html")) {
       isActive = isBlogPage;
     } else if (href.includes("about.html")) {
@@ -301,14 +306,14 @@ function updateBottomNavActiveStates() {
 
   const currentFile = getCurrentFile();
   const currentHash = getCurrentHash();
-  const isShopPage = currentFile === "shop.html" || isProductPage();
+  const isShopLinkActive = isShopPage() || isProductPage();
 
   links.forEach((link) => {
     const key = link.dataset.bottomNav;
     let isActive = false;
 
     if (key === "shop") {
-      isActive = isShopPage;
+      isActive = isShopLinkActive;
     } else if (key === "blog") {
       isActive = currentFile === "blog.html" || currentFile.startsWith("blog-");
     } else if (key === "categories") {
@@ -327,7 +332,7 @@ function updateBottomNavActiveStates() {
 }
 
 function setupShopCatalog() {
-  if (getCurrentFile() !== "shop.html") return;
+  if (!isShopPage()) return;
 
   const sections = Array.from(document.querySelectorAll(".shop-section"));
   if (!sections.length) return;
