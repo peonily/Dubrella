@@ -1237,13 +1237,6 @@ body.nav-enhanced .menu {
     align-items: flex-start;
   }
 
-  body.shop-catalog-ready .shop-section {
-    display: none;
-  }
-
-  body.shop-catalog-ready .shop-section.is-active-category {
-    display: block;
-  }
 }
 
 @media (min-width: 1024px) {
