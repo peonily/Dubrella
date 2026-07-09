@@ -1,5 +1,6 @@
 const http = require("http");
 const fs = require("fs/promises");
+const os = require("os");
 const path = require("path");
 const { URL } = require("url");
 
@@ -9,9 +10,12 @@ const SHOP_PATH = path.join(ROOT_DIR, "shop.html");
 const SITE_NAME = "Dubrella";
 const SITE_URL = String(process.env.SITE_URL || "https://dubrella.pages.dev").replace(/\/+$/, "");
 const PORT = Number(process.env.PORT || 4311);
+const HOST = process.env.HOST || "0.0.0.0";
 const DOMAIN_VERIFY = "3f9329f4428870c58c8b29e81cf2c699";
 const AMAZON_PRICE_LABEL = "Check the latest price on Amazon";
 const AMAZON_VIEW_LABEL = "VIEW ON AMAZON";
+const AFFILIATE_RESOLVE_TIMEOUT_MS = 15000;
+const AMAZON_FETCH_TIMEOUT_MS = 25000;
 
 const AMAZON_HEADERS = {
   "user-agent":
@@ -32,7 +36,12 @@ const SECTION_FALLBACKS = [
 ];
 
 function json(res, statusCode, payload) {
-  res.writeHead(statusCode, { "content-type": "application/json; charset=utf-8" });
+  res.writeHead(statusCode, {
+    "access-control-allow-headers": "content-type",
+    "access-control-allow-methods": "GET,POST,OPTIONS",
+    "access-control-allow-origin": "*",
+    "content-type": "application/json; charset=utf-8",
+  });
   res.end(JSON.stringify(payload, null, 2));
 }
 
@@ -340,18 +349,63 @@ function inferSectionId(productText, sectionIds) {
   return sectionIds[0] || "knits";
 }
 
+function getLocalNetworkUrls(port) {
+  return Object.values(os.networkInterfaces())
+    .flat()
+    .filter((networkInterface) => {
+      return networkInterface?.family === "IPv4" && !networkInterface.internal;
+    })
+    .map((networkInterface) => `http://${networkInterface.address}:${port}`);
+}
+
+async function fetchWithTimeout(url, options, timeoutMs, timeoutMessage) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(timeoutMessage);
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function extractAmazonPathInfo(urlString) {
   const url = new URL(urlString);
   const parts = url.pathname.split("/").filter(Boolean);
   const dpIndex = parts.findIndex((part) => part.toLowerCase() === "dp");
-  const gpIndex = parts.findIndex((part) => part.toLowerCase() === "product");
-  const asin = dpIndex >= 0 ? parts[dpIndex + 1] : gpIndex >= 1 ? parts[gpIndex + 1] : "";
-  const slugHint = dpIndex > 0 ? parts.slice(0, dpIndex).join(" ") : parts.join(" ");
+  const gpProductIndex = parts.findIndex((part, index) => {
+    return part.toLowerCase() === "product" && parts[index - 1]?.toLowerCase() === "gp";
+  });
+  const gpAwDIndex = parts.findIndex((part, index) => {
+    return part.toLowerCase() === "d" && parts[index - 1]?.toLowerCase() === "aw";
+  });
+  const obidosIndex = parts.findIndex((part) => part.toLowerCase() === "obidos");
+  const asin =
+    (dpIndex >= 0 && parts[dpIndex + 1]) ||
+    (gpProductIndex >= 0 && parts[gpProductIndex + 1]) ||
+    (gpAwDIndex >= 0 && parts[gpAwDIndex + 1]) ||
+    (obidosIndex >= 0 && parts[obidosIndex + 1]) ||
+    url.searchParams.get("asin") ||
+    url.searchParams.get("ASIN") ||
+    url.searchParams.get("pd_rd_i") ||
+    "";
+  const slugBoundary = [dpIndex, gpProductIndex, gpAwDIndex, obidosIndex].filter((index) => index > 0)[0];
+  const slugHint = slugBoundary ? parts.slice(0, slugBoundary).join(" ") : parts.join(" ");
+  const hostname = /amazon\./i.test(url.hostname) ? url.hostname : "www.amazon.com";
 
   return {
     asin: cleanText(asin).toUpperCase(),
     slugHint,
-    canonicalUrl: `https://${url.hostname}/dp/${cleanText(asin).toUpperCase()}`,
+    canonicalUrl: `https://${hostname}/dp/${cleanText(asin).toUpperCase()}`,
   };
 }
 
@@ -366,19 +420,41 @@ async function getSections() {
 }
 
 async function resolveAffiliateUrl(affiliateUrl) {
-  const response = await fetch(affiliateUrl, {
-    method: "GET",
-    redirect: "follow",
-    headers: AMAZON_HEADERS,
-  });
+  const originalPathInfo = extractAmazonPathInfo(affiliateUrl);
+  if (originalPathInfo.asin) {
+    return affiliateUrl;
+  }
+
+  let response;
+  try {
+    response = await fetchWithTimeout(
+      affiliateUrl,
+      {
+        method: "GET",
+        redirect: "follow",
+        headers: AMAZON_HEADERS,
+      },
+      AFFILIATE_RESOLVE_TIMEOUT_MS,
+      "Timed out resolving the affiliate short link. Paste the full Amazon /dp/ product link if the hotspot is blocking redirects.",
+    );
+  } catch (error) {
+    throw new Error(
+      `Could not resolve the affiliate short link: ${error.message}. Paste the full Amazon /dp/ product link if the hotspot is blocking redirects.`,
+    );
+  }
 
   return response.url || affiliateUrl;
 }
 
 async function fetchAmazonHtml(canonicalUrl) {
-  const response = await fetch(canonicalUrl, {
-    headers: AMAZON_HEADERS,
-  });
+  const response = await fetchWithTimeout(
+    canonicalUrl,
+    {
+      headers: AMAZON_HEADERS,
+    },
+    AMAZON_FETCH_TIMEOUT_MS,
+    `Timed out reading Amazon product data for ${canonicalUrl}. Try again on a stable connection.`,
+  );
 
   if (!response.ok) {
     throw new Error(`Amazon returned ${response.status} for ${canonicalUrl}`);
@@ -930,6 +1006,16 @@ async function serveStatic(req, res) {
 function createServer() {
   return http.createServer(async (req, res) => {
     try {
+      if (req.method === "OPTIONS") {
+        res.writeHead(204, {
+          "access-control-allow-headers": "content-type",
+          "access-control-allow-methods": "GET,POST,OPTIONS",
+          "access-control-allow-origin": "*",
+        });
+        res.end();
+        return;
+      }
+
       const requestUrl = new URL(req.url, `http://${req.headers.host}`);
 
       if (req.method === "GET" && requestUrl.pathname === "/api/sections") {
@@ -964,13 +1050,17 @@ function createServer() {
 }
 
 if (require.main === module) {
-  createServer().listen(PORT, () => {
+  createServer().listen(PORT, HOST, () => {
     console.log(`Affiliate admin app running at http://localhost:${PORT}`);
+    for (const url of getLocalNetworkUrls(PORT)) {
+      console.log(`Network URL: ${url}`);
+    }
   });
 }
 
 module.exports = {
   PORT,
+  HOST,
   SITE_NAME,
   SITE_URL,
   SHOP_PATH,

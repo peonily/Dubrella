@@ -19,9 +19,10 @@ const els = {
 };
 
 let lastAnalysis = null;
+const API_BASE = window.location.protocol === "file:" ? "http://localhost:4311" : "";
 
 async function requestJson(url, options = {}) {
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE}${url}`, {
     ...options,
     headers: {
       "content-type": "application/json",
