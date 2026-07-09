@@ -1049,13 +1049,32 @@ function createServer() {
   });
 }
 
-if (require.main === module) {
-  createServer().listen(PORT, HOST, () => {
-    console.log(`Affiliate admin app running at http://localhost:${PORT}`);
-    for (const url of getLocalNetworkUrls(PORT)) {
+function startServer(port = PORT, attempt = 0) {
+  const server = createServer();
+
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE" && attempt < 20) {
+      const nextPort = port + 1;
+      console.warn(`Port ${port} is already in use. Trying ${nextPort}...`);
+      startServer(nextPort, attempt + 1);
+      return;
+    }
+
+    throw error;
+  });
+
+  server.listen(port, HOST, () => {
+    console.log(`Affiliate admin app running at http://localhost:${port}`);
+    for (const url of getLocalNetworkUrls(port)) {
       console.log(`Network URL: ${url}`);
     }
   });
+
+  return server;
+}
+
+if (require.main === module) {
+  startServer();
 }
 
 module.exports = {
@@ -1068,6 +1087,7 @@ module.exports = {
   createServer,
   getSections,
   renderProductPage,
+  startServer,
   writeProductFiles,
 };
 
